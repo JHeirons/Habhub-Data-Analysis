@@ -1,19 +1,16 @@
 import matplotlib.pyplot as plt
-import numpy as np
-import datetime
 import matplotlib.dates as mdates
 import matplotlib.ticker as ticker
+import numpy as np
+import datetime
 import urllib
 from StringIO import StringIO
 
 flight_id = '3f2e3ebf76f973da7d395e753752fec8'
 payload_id = '3f2e3ebf76f973da7d395e75374d9f06'
+t = '10:45:'
 
-key = '%22' + flight_id + '%22,%22' + payload_id + '%22'
-z = 0
-
-time = '10:45:'
-def launch(time):
+def addSeconds(t):
     s1 = ['0','1','2','3','4','5']
     s2 = ['0','1','2','3','4','5','6','7','8','9']
     seconds = []
@@ -23,30 +20,36 @@ def launch(time):
             s = s1_1 + s2_1
             seconds.append(s)
     for s in seconds:
-        ntime = time + s
+        ntime = t + s
         launch.append(ntime)
         
     return launch  
 
-launch = launch(time)
-fp=urllib.urlopen('http://habitat.habhub.org/habitat/_design/ept/_list/csv/payload_telemetry/flight_payload_time?include_docs=true&startkey=['+key+']&endkey=['+key+',[]]&fields=sentence_id,time,latitude,longitude,altitude,satellites,speed,heading,temperature_external,battery,bmp,temperature_external2,humidity,pressure,pitch,roll,yaw,x,y,z')
+launch = addSeconds(t)
 
-data = np.genfromtxt(StringIO(fp.read()), dtype=None, delimiter=',', names=True)
+def getData(f_id, p_id):
+    key = '%22' + f_id + '%22,%22' + p_id + '%22'
+    fp=urllib.urlopen('http://habitat.habhub.org/habitat/_design/ept/_list/csv/payload_telemetry/flight_payload_time?include_docs=true&startkey=['+key+']&endkey=['+key+',[]]&fields=sentence_id,time,latitude,longitude,altitude,satellites,speed,heading,temperature_external,battery,bmp,temperature_external2,humidity,pressure,pitch,roll,yaw,x,y,z')
+    data = np.genfromtxt(StringIO(fp.read()), dtype=None, delimiter=',', names=True)
+    return data
 
-
-for x in np.nditer(data):
-    z += 1
-    for l in launch:
-        if l == x['time']:
-            start = z
-            break 
+data = getData(flight_id, payload_id)
 
 
-data = data[start:]
-print data
+def fromTime(data, launch):
+    z = 0
+    for x in np.nditer(data):
+        z += 1
+        for l in launch:
+            if l == x['time']:
+                start = z
+                break  
+    data = data[start:]
+    return data
+
+data = fromTime(data, launch)
 
 
-#x = np.arange(0, len(data['altitude']))
 x = data['time']
 y = data['altitude']
 
