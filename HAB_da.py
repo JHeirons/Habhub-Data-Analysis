@@ -52,15 +52,25 @@ data = fromTime(data, launch)
 
 x = data['time']
 y = data['altitude']
+y2 = data['pressure']
 
 x = [datetime.datetime.strptime(elem, '%H:%M:%S') for elem in x]
-fig, ax = plt.subplots()
-plt.plot(x, y)
+fig, (ax1, ax2) = plt.subplots(1, 2, sharex=True)
+ax1.plot(x, y)
+ax2.plot(x, y2)
 
-ax.xaxis.set_major_locator(mdates.MinuteLocator(interval=10))
-ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M:%S'))
-ax.xaxis.set_minor_locator(mdates.MinuteLocator(interval=5))
+ax1.xaxis.set_major_locator(mdates.MinuteLocator(interval=10))
+ax1.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+ax1.xaxis.set_minor_locator(mdates.MinuteLocator(interval=5))
 
-plt.title('Altitude vs Time')
-plt.setp(plt.gca().get_xticklabels(), rotation=45, horizontalalignment='right')
+ax2.xaxis.set_major_locator(mdates.MinuteLocator(interval=10))
+ax2.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+ax2.xaxis.set_minor_locator(mdates.MinuteLocator(interval=5))
+
+ax1.set_title('Altitude vs Time')
+plt.setp(ax1.get_xticklabels(), rotation=45, horizontalalignment='right')
+
+ax2.set_title('Pressure vs Time')
+plt.setp(ax2.get_xticklabels(), rotation=45, horizontalalignment='right')
+
 plt.show()
